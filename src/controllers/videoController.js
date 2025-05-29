@@ -160,12 +160,81 @@ const deleteVideo = async (req, res) => {
       details: error.message,
     });
   }
+
+
+  
 };
+
+const incrementVideoViews = async (req, res) => {
+  try {
+    const updatedVideo = await VideoService.incrementViews(req.params.id);
+    res.status(200).json({ message: 'Visualizaciones incrementadas', views: updatedVideo.views });
+  } catch (error) {
+    res.status(400).json({ error: error.message || 'Error incrementando las visualizaciones' });
+  }
+};
+
+const addComment = async (req, res) => {
+  const { id } = req.params; // id del video
+  const { usuario, texto } = req.body;
+
+  if (!usuario || !texto) {
+    return res.status(400).json({ error: "Faltan datos: 'usuario' o 'texto'" });
+  }
+
+  try {
+    const comment = { usuario, texto };
+
+    const updatedVideo = await VideoService.addComment(id, comment);
+
+    res.status(200).json({
+      message: "Comentario agregado correctamente",
+      comments: JSON.parse(updatedVideo.comments),
+    });
+  } catch (error) {
+    console.error("Error agregando comentario:", error);
+    res.status(500).json({ error: "Error al agregar comentario" });
+  }
+};
+
+const getComments = async (req, res) => {
+  try {
+    const video = await VideoService.getVideoById(req.params.id);
+    if (!video) return res.status(404).json({ error: "Video no encontrado" });
+
+    let comments = [];
+    if (video.comments) {
+      try {
+        comments = JSON.parse(video.comments);
+      } catch {
+        comments = [];
+      }
+    }
+    res.status(200).json(comments);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener comentarios" });
+  }
+};
+
+// Incrementar likes
+const incrementVideoLikes = async (req, res) => {
+  try {
+    const updatedVideo = await VideoService.incrementLikes(req.params.id);
+    res.status(200).json({ message: 'Likes incrementados', likes: updatedVideo.likes });
+  } catch (error) {
+    res.status(400).json({ error: error.message || 'Error incrementando los likes' });
+  }
+};
+
 
 module.exports = {
   createVideo,
   getVideos,
   getVideoById,
   updateVideo,
-  deleteVideo
+  deleteVideo,
+  incrementVideoViews,
+  addComment,
+  getComments,
+  incrementVideoLikes
 };
