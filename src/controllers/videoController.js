@@ -9,11 +9,9 @@ const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
 });
 
-//-----------------------------------------------------------------Create Video----------------------------------------------------------------------
 const createVideo = async (req, res) => {
-  const { user_id, title, description } = req.body; // user_id ahora viene directamente en el cuerpo de la solicitud
+  const { user_id, title, description } = req.body; 
 
-  // Verificación de si el video fue proporcionado
   if (!req.files || !req.files.video) {
     console.error("Archivo de video requerido (campo: 'video')");
     return res.status(400).json({ error: "Archivo de video requerido (campo: 'video')" });
@@ -23,12 +21,10 @@ const createVideo = async (req, res) => {
   const thumbnailFile = req.files.thumbnail || null;
 
   try {
-    // Subir el video y la miniatura a S3
     const { videoUrl, thumbnailUrl } = await uploadVideoToS3Post(videoFile, thumbnailFile);
 
-    // Crear el nuevo video en la base de datos
     const newVideo = await VideoService.createVideo({
-      user_id, // Se incluye el user_id en la creación del video
+      user_id,
       title,
       description,
       video_url: videoUrl,
@@ -49,7 +45,6 @@ const createVideo = async (req, res) => {
   }
 };
 
-//-----------------------------------------------------------------Get All Videos--------------------------------------------------------------
 const getVideos = async (req, res) => {
   try {
     const videos = await VideoService.getAllVideos();
@@ -59,7 +54,6 @@ const getVideos = async (req, res) => {
   }
 };
 
-//-----------------------------------------------------------------Get Video By ID--------------------------------------------------------------
 const getVideoById = async (req, res) => {
   try {
     const video = await VideoService.getVideoById(req.params.id);
@@ -70,7 +64,6 @@ const getVideoById = async (req, res) => {
   }
 };
 
-//-----------------------------------------------------------------Update Video--------------------------------------------------------------
 const updateVideo = async (req, res) => {
   const { title, description, video_url, thumbnail_url } = req.body;
 
@@ -84,14 +77,12 @@ const updateVideo = async (req, res) => {
     const videoKey = video.video_url.split('/').pop();
     const thumbnailKey = video.thumbnail_url ? video.thumbnail_url.split('/').pop() : null;
 
-    // Si se pasa un nuevo video o thumbnail
     if (req.files && (req.files.video || req.files.thumbnail)) {
       const videoFile = req.files.video || null;
       const thumbnailFile = req.files.thumbnail || null;
 
       const { videoUrl, thumbnailUrl } = await uploadVideoToS3Update(videoFile, thumbnailFile);
 
-      // Eliminar el video anterior si se sube uno nuevo
       if (videoFile) {
         await s3.deleteObject({
           Bucket: process.env.AWS_BUCKET_NAME,
@@ -99,7 +90,6 @@ const updateVideo = async (req, res) => {
         }).promise();
       }
 
-      // Eliminar el thumbnail anterior si se sube uno nuevo o si se generó automáticamente
       if ((thumbnailFile || videoFile) && thumbnailKey) {
         await s3.deleteObject({
           Bucket: process.env.AWS_THUMBNAIL_BUCKET_NAME,
@@ -117,7 +107,6 @@ const updateVideo = async (req, res) => {
       return res.status(200).json({ message: 'Video actualizado correctamente', updatedVideo });
     }
 
-    // Si no se pasó ningún archivo, solo actualizar datos básicos
     const updatedVideo = await VideoService.updateVideo(req.params.id, {
       title,
       description,
@@ -132,7 +121,6 @@ const updateVideo = async (req, res) => {
   }
 };
 
-//-----------------------------------------------------------------Delete Video--------------------------------------------------------------
 const deleteVideo = async (req, res) => {
   try {
     const video = await VideoService.getVideoById(req.params.id);
@@ -175,7 +163,7 @@ const incrementVideoViews = async (req, res) => {
 };
 
 const addComment = async (req, res) => {
-  const { id } = req.params; // id del video
+  const { id } = req.params;
   const { usuario, texto } = req.body;
 
   if (!usuario || !texto) {
@@ -216,7 +204,6 @@ const getComments = async (req, res) => {
   }
 };
 
-// Incrementar likes
 const incrementVideoLikes = async (req, res) => {
   try {
     const updatedVideo = await VideoService.incrementLikes(req.params.id);

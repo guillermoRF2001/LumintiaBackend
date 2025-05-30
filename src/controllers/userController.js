@@ -11,7 +11,6 @@ const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
 });
 
-// Crear usuario
 const createUser = async (req, res) => {
   const { name, email, password, role, is_admin } = req.body;
 
@@ -44,7 +43,6 @@ const createUser = async (req, res) => {
   }
 };
 
-// Obtener todos los usuarios
 const getUsers = async (req, res) => {
   try {
     const users = await UserService.getAllUsers();
@@ -54,7 +52,6 @@ const getUsers = async (req, res) => {
   }
 };
 
-// Obtener usuario por ID
 const getUserById = async (req, res) => {
   try {
     const user = await UserService.getUserById(req.params.id);
@@ -65,7 +62,6 @@ const getUserById = async (req, res) => {
   }
 };
 
-// Actualizar usuario
 const updateUser = async (req, res) => {
   const { name, email, password, role, is_admin } = req.body;
   const imageFile = req.files?.image;
@@ -111,7 +107,6 @@ const updateUser = async (req, res) => {
   }
 };
 
-// Eliminar usuario
 const deleteUser = async (req, res) => {
   try {
     const user = await UserService.getUserById(req.params.id);
@@ -119,7 +114,6 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Eliminar imagen del bucket si existe
     const imageKey = user.profile_picture ? user.profile_picture.split('/').pop() : null;
     if (imageKey) {
       try {
@@ -127,7 +121,6 @@ const deleteUser = async (req, res) => {
           Bucket: process.env.AWS_USER_IMAGE_BUCKET_NAME,
           Key: imageKey,
         }).promise();
-        console.log(`Imagen de usuario eliminada del bucket: ${imageKey}`);
       } catch (err) {
         console.warn(`Error al eliminar imagen del bucket: ${err.message}`);
       }
@@ -141,7 +134,6 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// Iniciar sesión
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -178,7 +170,6 @@ const loginUser = async (req, res) => {
   }
 };
 
-// Obtener todos los profesores con cantidad de videos
 const getTeachersWithVideoCount = async () => {
   try {
     const teachers = await User.findAll({

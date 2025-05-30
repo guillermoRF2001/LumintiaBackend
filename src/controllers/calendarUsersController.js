@@ -3,7 +3,6 @@ const Calendar = require("../models/calendarModel");
 const User = require("../models/userModel");
 const { Op } = require("sequelize");
 
-// Obtener todas las relaciones entre eventos y usuarios
 const getAllRelations = async (req, res) => {
   try {
     const relations = await CalendarUsers.findAll();
@@ -14,7 +13,6 @@ const getAllRelations = async (req, res) => {
   }
 };
 
-// Agregar usuario a un evento existente
 const addUserToEvent = async (req, res) => {
   const { calendar_id, user_id, role } = req.body;
 
@@ -24,7 +22,6 @@ const addUserToEvent = async (req, res) => {
       return res.status(404).json({ error: "Evento no encontrado" });
     }
 
-    // Validar solapamiento
     const overlapping = await Calendar.findOne({
       include: {
         model: User,
@@ -60,7 +57,6 @@ const addUserToEvent = async (req, res) => {
   }
 };
 
-// Eliminar un participante de un evento
 const removeUserFromEvent = async (req, res) => {
   const { calendar_id, user_id } = req.params;
 

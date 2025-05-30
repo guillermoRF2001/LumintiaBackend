@@ -72,7 +72,7 @@ const uploadVideoToS3Update = async (videoFile = null, thumbnailFile = null) => 
   }
 
   if (thumbnailFile) {
-    const thumbName = baseName || uuidv4(); // si no se subió video, genera nombre
+    const thumbName = baseName || uuidv4(); 
     const thumbKey = `thumbnails/${thumbName}.jpg`;
 
     await s3.upload({

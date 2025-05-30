@@ -66,13 +66,11 @@ const sendFile = async (socket, io, { room, usuario, archivo, nombreArchivo, tip
       throw new Error("Archivo incompleto o malformado.");
     }
 
-    // ✅ Validar tipo MIME
     const tiposPermitidos = ["image/jpeg", "image/png", "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
     if (!tiposPermitidos.includes(tipoArchivo)) {
       throw new Error("Tipo de archivo no permitido.");
     }
 
-    // ✅ Decodificar base64
     const base64Data = archivo.split(';base64,').pop();
     const bufferArchivo = Buffer.from(base64Data, 'base64');
 
@@ -82,7 +80,6 @@ const sendFile = async (socket, io, { room, usuario, archivo, nombreArchivo, tip
       throw new Error("El archivo excede el tamaño máximo permitido (500 MB).");
     }
 
-    // ✅ Subir a S3 con comprobación
     const uploadResult = await uploadArchiveS3(bufferArchivo, nombreArchivo, tipoArchivo);
 
     if (!uploadResult || !uploadResult.fileUrl || !uploadResult.key) {

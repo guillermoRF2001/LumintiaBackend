@@ -12,7 +12,7 @@ const s3 = new AWS.S3({
 const uploadUserImageToS3 = async (imageFile) => {
   const ext = path.extname(imageFile.name);
   const fileName = `${uuidv4()}${ext}`;
-  const key = `${fileName}`;  // Subimos a esta carpeta del bucket
+  const key = `${fileName}`;  
 
   const tempDir = path.join(__dirname, '../temp');
   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);

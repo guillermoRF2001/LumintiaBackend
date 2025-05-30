@@ -1,4 +1,3 @@
-// utils/generarLlave.js
 const generarLlave = (longitud = 20) => {
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let llave = '';

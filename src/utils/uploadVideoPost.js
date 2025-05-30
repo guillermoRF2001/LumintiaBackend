@@ -41,7 +41,6 @@ const uploadVideoToS3Post = async (videoFile, thumbnailFile = null) => {
 
   fs.writeFileSync(tempVideo, videoFile.data);
 
-  // Subir el video
   await s3.upload({
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: fileName,

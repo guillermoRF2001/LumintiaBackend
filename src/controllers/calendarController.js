@@ -5,14 +5,12 @@ const { Op } = require("sequelize");
 const generarLlave = require("../utils/generarLlave");
 const sendEmail = require("../utils/sendEmail");
 
-// Función auxiliar para sumar días a una fecha
 const addDays = (date, days) => {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
 };
 
-// 📅 Crear un nuevo evento con validación de solapamiento para todos los participantes y opción de repetición semanal
 const createEvent = async (req, res) => {
   let {
     start_time,
@@ -37,13 +35,11 @@ const createEvent = async (req, res) => {
       return res.status(400).json({ error: "La fecha de inicio debe ser anterior a la de fin." });
     }
 
-    // Validar roles (al menos un teacher y un student)
     const roles = participants.map(p => p.role);
     if (!roles.includes("teacher") || !roles.includes("student")) {
       return res.status(400).json({ error: "Debe haber al menos un teacher y un student en los participantes." });
     }
 
-    // Calcular repeticiones
     let repetitions = 1;
     if (repeatWeekly) {
       if (repeatCount && repeatCount > 0) {
@@ -60,7 +56,6 @@ const createEvent = async (req, res) => {
 
     const eventsToCreate = [];
 
-    // Validar solapamientos para cada repetición y participante
     for (let i = 0; i < repetitions; i++) {
       const startRepeat = addDays(startDate, i * 7);
       const endRepeat = addDays(endDate, i * 7);
@@ -94,7 +89,6 @@ const createEvent = async (req, res) => {
       });
     }
 
-    // Obtener detalles de los usuarios solo una vez para optimizar
     const userIds = participants.map(p => p.user_id);
     const userDetails = await User.findAll({
       where: {
@@ -102,7 +96,6 @@ const createEvent = async (req, res) => {
       }
     });
 
-    // Crear eventos y relaciones
     const createdEvents = [];
     for (const eventData of eventsToCreate) {
       const newEvent = await Calendar.create(eventData);
@@ -145,7 +138,6 @@ const createEvent = async (req, res) => {
       }
       } catch (emailError) {
         console.error("Error enviando correos:", emailError);
-        // No interrumpir la creación de eventos si falla el envío de email
       }
     }
 
@@ -160,7 +152,6 @@ const createEvent = async (req, res) => {
   }
 };
 
-// 📥 Obtener todos los eventos (puedes filtrar por user_id con ?user_id=)
 const getAllEvents = async (req, res) => {
   const { user_id } = req.query;
 
@@ -190,7 +181,6 @@ const getAllEvents = async (req, res) => {
   }
 };
 
-// 📥 Obtener evento por ID
 const getEventById = async (req, res) => {
   try {
     const event = await Calendar.findByPk(req.params.id, {
@@ -211,7 +201,6 @@ const getEventById = async (req, res) => {
   }
 };
 
-// 🔄 Actualizar evento (título, comentario, fechas y validar solapamiento si cambia)
 const updateEvent = async (req, res) => {
   const { start_time, end_time, title, comment } = req.body;
 
@@ -224,7 +213,6 @@ const updateEvent = async (req, res) => {
       return res.status(404).json({ error: "Evento no encontrado" });
     }
 
-    // Validar solapamiento si hay cambio de horario
     if (start_time && end_time) {
       for (const participant of event.participants) {
         const overlapping = await Calendar.findOne({
@@ -256,7 +244,6 @@ const updateEvent = async (req, res) => {
   }
 };
 
-// ❌ Eliminar evento
 const deleteEvent = async (req, res) => {
   try {
     const event = await Calendar.findByPk(req.params.id);
